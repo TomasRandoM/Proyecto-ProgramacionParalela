@@ -5,15 +5,23 @@ using namespace std;
 
 void printMatrix(float** matrix, int n, int m);
 
-int main() {
+int main(int argc, char** argv) {
     //n y m son las filas y columnas de la matriz 1. n1 y m1 son las filas y columnas de la matriz 2.
     int n, m, n1, m1;
-    /*
-    n = 3;
-    m = 3;
-    n1 = 3;
-    m1 = 3;
-    */
+   
+    if (argc == 2 ) {
+        n = atoi(argv[1]);
+        if (n != 300 && n != 1000 && n != 3000) {
+            cout << "ERROR. El parámetro ingresado no es correcto. Debe ingresar 300/1000/3000" << endl;
+            return 0;
+        }
+        m = n;
+        m1 = m;
+        n1 = n;
+    } else {
+        cout << "ERROR. El número de parámetros ingresados no es correcto. Debe indicar 300/1000/3000." << endl;
+        return 0;
+    }
 
     //Verifico que la multipicación se pueda hacer
     if (m != n1) {
@@ -30,24 +38,17 @@ int main() {
 
     for (int i = 0; i < n; i++) {
         matrix[i] = new float[m];
+        fill(matrix[i], matrix[i] + m, 0.1);
         matrixRes[i] = new float[m1];
     }
     for (int i = 0; i < n1; i++) {
         matrix2[i] = new float[m1];
+        fill(matrix2[i], matrix2[i] + m1, 0.2);
     }
-
-    /*
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            matrix[i][j] = 2;
-            matrix2[i][j] = j;
-        }
-    }
-    */
 
     //Proceso de multiplicación de matrices
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
+        for (int j = 0; j < m1; j++) {
             matrixRes[i][j] = 0;
             for (int k = 0; k < m; k++) {
                 matrixRes[i][j] += matrix[i][k] * matrix2[k][j];
@@ -55,14 +56,13 @@ int main() {
         }
     }
 
-    /*
-    cout << "Matriz 1:" << endl;
-    printMatrix(matrix, n, m);
-    cout << "Matriz 2:" << endl;
-    printMatrix(matrix2, n1, m1);
-    cout << "Matriz resultado:" << endl;
-    printMatrix(matrixRes, n, m1);
-    */
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
+    cout << "El elemento (0, 0) es = " << matrixRes[0][0] << endl;
+    cout << "El elemento (0, m) es = " << matrixRes[0][m1 - 1] << endl;
+    cout << "El elemento (n, 0) es = " << matrixRes[n - 1][0] << endl;
+    cout << "El elemento (n, m) es = " << matrixRes[n - 1][m1 - 1] << endl;
+    cout << "El tiempo de ejecución fue de: " << duration.count() << endl;
 
     //Se libera la memoria utilizada
     for (int i = 0; i < n; i++) {
@@ -76,9 +76,7 @@ int main() {
     delete[] matrix;
     delete[] matrix2;
     delete[] matrixRes;
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> duration = end - start;
-    cout << "El tiempo de ejecución fue de: " << duration.count() << endl;
+    
 }
 
 //Imprime la matriz, recibe como parámetros la matriz y la cantidad de filas y columnas

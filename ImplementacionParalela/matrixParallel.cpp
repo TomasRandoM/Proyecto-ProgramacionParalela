@@ -13,14 +13,27 @@ void printMatrix(float** matrix, int n, int m) {
 }
 
 int main(int argc, char** argv) {
-    int rank, size;
-    int filas = 6, columnas = 3;
-    int filas1 = 3, columnas1 = 2;
+    int rank, size, filas, filas1, columnas, columnas1;
 
+    if (argc == 2 ) {
+        filas = atoi(argv[1]);
+        if (filas != 300 && filas != 1000 && filas != 3000) {
+            cout << "ERROR. El parámetro ingresado no es correcto. Debe ingresar 300/1000/3000" << endl;
+            return 0;
+        }
+        columnas = filas;
+        columnas1 = columnas;
+        filas1 = filas;
+    } else {
+        cout << "ERROR. El número de parámetros ingresados no es correcto. Debe indicar 300/1000/3000." << endl;
+        return 0;
+    }
+    
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    double start = MPI_Wtime();
     //Utilizados para el scatterv y el gatherv. Vector de elementos enviados y de desplazamientos.
     int* sendsizes = new int[size];
     int* displs = new int[size];
@@ -42,10 +55,6 @@ int main(int argc, char** argv) {
         aux += sendsizes[i];
     }
     
-    //Bcast para otra versión
-    //MPI_Bcast(sendsizes, size, MPI_INT, 0, MPI_COMM_WORLD);
-    //MPI_Bcast(displs, size, MPI_INT, 0, MPI_COMM_WORLD);
-
     //Declaro e inicializo los datos para las matrices B y las filas de A que cada proceso recibirá
     float* recvMatrixData = new float[sendsizes[rank]];
     float* matrixdata1 = new float[filas1 * columnas1];
@@ -55,6 +64,11 @@ int main(int argc, char** argv) {
         float* matrixdata = new float[filas * columnas];
         float** matrix = new float*[filas];
         
+        //Inicializo las matrices
+        fill(matrixdata, matrixdata + (filas * columnas), 0.1);
+        fill(matrixdata1, matrixdata1 + (filas1 * columnas1), 0.2);
+
+        //Formo las matrices
         for (int i = 0; i < filas; ++i) {
             matrix[i] = &matrixdata[i * columnas];
         }
@@ -62,21 +76,6 @@ int main(int argc, char** argv) {
         for (int i = 0; i < filas1; ++i) {
             matrix1[i] = &matrixdata1[i * columnas1];
         }
-
-        //inicializo las matrices
-        for (int i = 0; i < filas; ++i) {
-            for (int j = 0; j < columnas; ++j) {
-                matrix[i][j] = (i+1)*(j+1); 
-            }
-        }
-        for (int i = 0; i < filas1; ++i) {
-            for (int j = 0; j < columnas1; ++j) {
-                matrix1[i][j] = 2*(i+1)*(j+1); 
-            }
-        }
-        printMatrix(matrix, filas, columnas);
-        printMatrix(matrix1, filas1, columnas1);
-
 
         //Realizo el scatter de las filas de A
         MPI_Scatterv(matrixdata, sendsizes, displs, MPI_FLOAT, recvMatrixData, sendsizes[rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -135,10 +134,13 @@ int main(int argc, char** argv) {
 
         //Realizo el gather de todos los resultados obtenidos
         MPI_Gatherv(resMatrixAuxData, rowCount * columnas1, MPI_FLOAT, matrixdatarta, recvcounts, displs_rta, MPI_FLOAT, 0, MPI_COMM_WORLD);
+        double end = MPI_Wtime();
 
-        cout << "Matriz Resultado:" << endl;
-        printMatrix(matrixrta, filas, columnas1);
-
+        cout << "El elemento (0, 0) es = " << matrixrta[0][0] << endl;
+        cout << "El elemento (0, m) es = " << matrixrta[0][columnas1 - 1] << endl;
+        cout << "El elemento (n, 0) es = " << matrixrta[filas - 1][0] << endl;
+        cout << "El elemento (n, m) es = " << matrixrta[filas - 1][columnas1 - 1] << endl;
+        cout << "El tiempo de ejecución fue de " << end - start << " segundos." << endl;
     } else {
         MPI_Gatherv(resMatrixAuxData, rowCount * columnas1, MPI_FLOAT, nullptr, nullptr, nullptr, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
