@@ -79,6 +79,10 @@ int main(int argc, char** argv) {
 
         //Realizo el scatter de las filas de A
         MPI_Scatterv(matrixdata, sendsizes, displs, MPI_FLOAT, recvMatrixData, sendsizes[rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
+
+        //Libero la memoria de la matriz que ya fue utilizada
+        delete[] matrix;
+        delete[] matrixdata;
     } else {
         MPI_Scatterv(nullptr, sendsizes, displs, MPI_FLOAT, recvMatrixData, sendsizes[rank], MPI_FLOAT, 0, MPI_COMM_WORLD);
     }
@@ -141,10 +145,25 @@ int main(int argc, char** argv) {
         cout << "El elemento (n, 0) es = " << matrixrta[filas - 1][0] << endl;
         cout << "El elemento (n, m) es = " << matrixrta[filas - 1][columnas1 - 1] << endl;
         cout << "El tiempo de ejecución fue de " << end - start << " segundos." << endl;
-    } else {
-        MPI_Gatherv(resMatrixAuxData, rowCount * columnas1, MPI_FLOAT, nullptr, nullptr, nullptr, MPI_FLOAT, 0, MPI_COMM_WORLD);
+        //Libero la memoria utilizada en el proceso 0
+        delete[] matrixrta;
+        delete[] matrixdatarta;
+        delete[] recvcounts;
+        delete[] displs_rta;
 
+    } else {
+
+        MPI_Gatherv(resMatrixAuxData, rowCount * columnas1, MPI_FLOAT, nullptr, nullptr, nullptr, MPI_FLOAT, 0, MPI_COMM_WORLD);
     }
+    //Libero la memoria utilizada en cada proceso
+    delete[] sendsizes;
+    delete[] displs;
+    delete[] recvMatrixData;
+    delete[] matrixdata1;
+    delete[] matrix1;
+    delete[] resMatrixAux;
+    delete[] resMatrixAuxData;
+    delete[] recvMatrix;
 
     MPI_Finalize();
     return 0;

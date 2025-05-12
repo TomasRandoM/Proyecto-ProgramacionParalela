@@ -32,23 +32,18 @@ int main(int argc, char** argv) {
     auto start = chrono::high_resolution_clock::now();
 
     //Declaración de matrices (matriz 1, 2 y donde se almacenará el resultado)
-    float* matrixdata = new float[n * m];
-    float* matrixdata2 = new float[n1 * m1];
-    float* matrixdataRes = new float[n * m1];
     float** matrix = new float*[n];
     float** matrix2 = new float*[n1];
     float** matrixRes = new float*[n];
 
-    fill(matrixdata, matrixdata + (n * m), 0.1);
-    fill(matrixdata2, matrixdata2 + (n1 * m1), 0.2);
-
     for (int i = 0; i < n; i++) {
-        matrix[i] = &matrixdata[i * m];
-        matrixRes[i] = &matrixdataRes[i * m1];
+        matrix[i] = new float[m];
+        fill(matrix[i], matrix[i] + m, 0.1);
+        matrixRes[i] = new float[m1];
     }
-
     for (int i = 0; i < n1; i++) {
-        matrix2[i] = &matrixdata2[i * m1];
+        matrix2[i] = new float[m1];
+        fill(matrix2[i], matrix2[i] + m1, 0.2);
     }
 
     //Proceso de multiplicación de matrices
@@ -70,14 +65,18 @@ int main(int argc, char** argv) {
     cout << "El tiempo de ejecución fue de: " << duration.count() << endl;
 
     //Se libera la memoria utilizada
-    delete[] matrixdata;
-    delete[] matrixdata2;
-    delete[] matrixdataRes;
+    for (int i = 0; i < n; i++) {
+        delete[] matrix[i];
+        delete[] matrixRes[i];
+    }
+    for (int i = 0; i < n1; i++) {
+        delete[] matrix2[i];
+    }
 
     delete[] matrix;
     delete[] matrix2;
     delete[] matrixRes;
-    return 0;
+    
 }
 
 //Imprime la matriz, recibe como parámetros la matriz y la cantidad de filas y columnas
