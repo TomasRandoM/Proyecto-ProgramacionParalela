@@ -9,15 +9,11 @@ int main(int argc, char** argv) {
     //n y m son las filas y columnas de la matriz 1. n1 y m1 son las filas y columnas de la matriz 2.
     int n, m, n1, m1;
    
-    if (argc == 2 ) {
+    if (argc == 5 ) {
         n = atoi(argv[1]);
-        if (n != 300 && n != 1000 && n != 3000) {
-            cout << "ERROR. El parámetro ingresado no es correcto. Debe ingresar 300/1000/3000" << endl;
-            return 0;
-        }
-        m = n;
-        m1 = m;
-        n1 = n;
+        m = atoi(argv[2]);
+        m1 = atoi(argv[4]);
+        n1 = atoi(argv[3]);
     } else {
         cout << "ERROR. El número de parámetros ingresados no es correcto. Debe indicar 300/1000/3000." << endl;
         return 0;
