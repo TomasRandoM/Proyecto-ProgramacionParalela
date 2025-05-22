@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <iostream>
+#include <random>
 
 using namespace std;
 
@@ -14,6 +15,9 @@ void printMatrix(float** matrix, int n, int m) {
 
 int main(int argc, char** argv) {
     int rank, size, filas, filas1, columnas, columnas1;
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(1, 300);
 
     //Se piden 4 argumentos filas de A, columnas de A, filas de B, columnas de B
     if (argc == 5 ) {
@@ -77,10 +81,17 @@ int main(int argc, char** argv) {
         float* matrixdata = new float[filas * columnas];
         float** matrix = new float*[filas];
         
-        //Inicializo las matrices
+        //Inicializo las matrices con números random
+        for (int i = 0; i < filas * columnas; i++) {
+            matrixdata[i] = dis(gen);
+        }
+        for (int i = 0; i < filas1 * columnas1; i++) {
+            matrixdata1[i] = dis(gen);
+        }
+        /*
         fill(matrixdata, matrixdata + (filas * columnas), 0.1);
         fill(matrixdata1, matrixdata1 + (filas1 * columnas1), 0.2);
-
+        */
         //Formo las matrices
         for (int i = 0; i < filas; ++i) {
             matrix[i] = &matrixdata[i * columnas];
